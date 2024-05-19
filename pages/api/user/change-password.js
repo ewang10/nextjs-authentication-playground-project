@@ -1,4 +1,4 @@
-import { getSession } from 'next-auth/react';
+import { getToken } from 'next-auth/jwt';
 import { connectToDB } from '../../../lib/db';
 import { hashPassword, verifyPassword } from '../../../lib/auth';
 
@@ -7,16 +7,14 @@ async function handler(req, res) {
         return;
     }
 
-    const session = await getSession({ req, res });
-
-    console.log({ session, cookies: req.cookies })
+    const session = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     if (!session) {
         res.status(401).json({ message: 'Not authenticated!' });
         return;
     }
 
-    const userEmail = session.user.email;
+    const userEmail = session.email;
     const { oldPassword, newPassword } = req.body;
 
     const client = await connectToDB();
